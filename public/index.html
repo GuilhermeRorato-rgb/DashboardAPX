@@ -1764,6 +1764,7 @@ document.getElementById('cartViewTabs').addEventListener('click',e=>{const b=e.t
           CADASTRO=d.cadastro;CADASTRO_POLOS=d.cadastroPolos||[];CADASTRO_SEGS=d.cadastroSegs||[];
           CADASTRO_RMS=d.cadastroRMs||[];CADASTRO_GRUPOS=d.cadastroGrupos||[];
           CADASTRO_GRUPOS_CARTS=d.cadastroGruposCarts||[];META_CAD=d.metaCad||null;
+          if(d.emissoresApex&&d.emissoresApex.length)EMISSORES_APEX=new Set(d.emissoresApex);
           setupGerencialFilters();renderGerencial();}
         if(d.taxas){TAXAS=d.taxas;TAXAS_ALL_MONTHS=d.taxasMonths||[];META_TAXAS=d.metaTaxas||null;}
         if(DATA.length){showDashboardAtivos();populateSelects();render();}
@@ -1801,6 +1802,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         cadastro:CADASTRO,cadastroPolos:CADASTRO_POLOS,cadastroSegs:CADASTRO_SEGS,
         cadastroRMs:CADASTRO_RMS,cadastroGrupos:CADASTRO_GRUPOS,
         cadastroGruposCarts:CADASTRO_GRUPOS_CARTS,metaCad:META_CAD,
+        emissoresApex:[...EMISSORES_APEX],
         taxas:TAXAS,taxasMonths:TAXAS_ALL_MONTHS,metaTaxas:META_TAXAS};
       const r=await fetch('/api/data',{method:'POST',
         headers:{'Content-Type':'application/json','x-admin-password':pwd},
