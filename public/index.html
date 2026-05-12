@@ -1328,7 +1328,8 @@ function switchModule(mod){
   document.getElementById('modGerencial').style.display=mod==='gerencial'?'':'none';
   document.getElementById('modAtivos').style.display=mod==='ativos'?'':'none';document.getElementById('modCarteiras').style.display=mod==='carteiras'?'':'none';
   document.getElementById('modEventos').style.display=mod==='eventos'?'':'none';
-  if(mod==='carteiras'){if(META_C){badge.style.display='inline-block';document.getElementById('posicaoDate').textContent=' '+fmtDateBR(META_C.date);txt.textContent=META_C.carteiras+' carteiras';btn.style.display='inline-block';btn.textContent='Trocar planilha';}else{badge.style.display='none';txt.textContent='';btn.style.display='none';}}else if(mod==='ativos'){if(DATA.length>0)showDashboardAtivos();else showUploadAtivos();}
+  if(mod==='ativos'){if(DATA.length>0)showDashboardAtivos();else showUploadAtivos();}
+  else if(mod==='gerencial'){if(typeof showDashboardGerencial==='function'&&CADASTRO&&CADASTRO.length)showDashboardGerencial();else if(typeof showUploadGerencial==='function')showUploadGerencial();}
   else if(mod==='carteiras'){if(CART_DATA){document.getElementById('uploadScreenCart').style.display='none';document.getElementById('dashboardCart').style.display='block';}else{document.getElementById('uploadScreenCart').style.display='flex';document.getElementById('dashboardCart').style.display='none';}}else{if(EV_DATA.length>0){document.getElementById('uploadScreenEv').style.display='none';document.getElementById('dashboardEv').classList.add('active');}else{document.getElementById('uploadScreenEv').style.display='flex';document.getElementById('dashboardEv').classList.remove('active');}}
   try{localStorage.setItem('apex_current_module',mod);}catch(e){}
   updateHeaderMeta();
