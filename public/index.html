@@ -1019,6 +1019,7 @@ function updateHeaderMeta(){
     if(META_E){badge.style.display='inline-block';document.getElementById('posicaoDate').textContent=' '+(META_E.hoje?fmtDateBR(META_E.hoje):fmtDateBR(META_E.minDate));txt.textContent=META_E.rows+' eventos \u2022 '+META_E.carteiras+' carteiras';btn.style.display='inline-block';btn.textContent='Trocar planilha';}
     else{badge.style.display='none';txt.textContent='';btn.style.display='none';}
   }
+  document.getElementById('publishBtn').style.display=(DATA&&DATA.length)?'inline-block':'none';
 }
 function handleFile(file){
   clearError();
