@@ -1330,7 +1330,7 @@ function switchModule(mod){
   document.getElementById('modAtivos').style.display=mod==='ativos'?'':'none';document.getElementById('modCarteiras').style.display=mod==='carteiras'?'':'none';
   document.getElementById('modEventos').style.display=mod==='eventos'?'':'none';
   if(mod==='ativos'){if(DATA.length>0)showDashboardAtivos();else showUploadAtivos();}
-  else if(mod==='gerencial'){if(typeof showDashboardGerencial==='function'&&CADASTRO&&CADASTRO.length)showDashboardGerencial();else if(typeof showUploadGerencial==='function')showUploadGerencial();}
+  else if(mod==='gerencial'){if(Object.keys(CADASTRO||{}).length>0)renderGerencial();}
   else if(mod==='carteiras'){if(CART_DATA){document.getElementById('uploadScreenCart').style.display='none';document.getElementById('dashboardCart').style.display='block';}else{document.getElementById('uploadScreenCart').style.display='flex';document.getElementById('dashboardCart').style.display='none';}}else{if(EV_DATA.length>0){document.getElementById('uploadScreenEv').style.display='none';document.getElementById('dashboardEv').classList.add('active');}else{document.getElementById('uploadScreenEv').style.display='flex';document.getElementById('dashboardEv').classList.remove('active');}}
   try{localStorage.setItem('apex_current_module',mod);}catch(e){}
   updateHeaderMeta();
@@ -1764,7 +1764,7 @@ document.getElementById('cartViewTabs').addEventListener('click',e=>{const b=e.t
           CADASTRO=d.cadastro;CADASTRO_POLOS=d.cadastroPolos||[];CADASTRO_SEGS=d.cadastroSegs||[];
           CADASTRO_RMS=d.cadastroRMs||[];CADASTRO_GRUPOS=d.cadastroGrupos||[];
           CADASTRO_GRUPOS_CARTS=d.cadastroGruposCarts||[];META_CAD=d.metaCad||null;
-          setupGerencialFilters();}
+          setupGerencialFilters();renderGerencial();}
         if(d.taxas){TAXAS=d.taxas;TAXAS_ALL_MONTHS=d.taxasMonths||[];META_TAXAS=d.metaTaxas||null;}
         if(DATA.length){showDashboardAtivos();populateSelects();render();}
         if(EV_DATA.length)setupEventosUI();
