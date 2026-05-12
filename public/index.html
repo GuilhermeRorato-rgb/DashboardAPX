@@ -1806,8 +1806,7 @@ document.addEventListener('DOMContentLoaded',()=>{
         body:JSON.stringify(payload)});
       if(r.ok){
         document.getElementById('publishModal').classList.remove('open');
-        document.getElementById('publishBtn').style.display='none';
-        showToast('✓ Dashboard publicado! Todos os usuários já vîem os novos dados.','success');
+        showToast('✓ Dashboard publicado! Todos os usuários já veem os novos dados.','success');
       }else if(r.status===401){
         errEl.textContent='Senha incorreta. Tente novamente.';
       }else{
