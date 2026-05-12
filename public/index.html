@@ -1900,6 +1900,7 @@ function handleFileCad(file){
       persistCadastro();setupGerencialFilters();renderGerencial();
       if(CART_DATA||cartState.carteira||cartState.grupoCart)setupCarteirasUI();
       showToast('✓ Cadastro atualizado: '+Object.keys(p.cadastro).length+' carteiras, '+EMISSORES_APEX.size+' emissores proprietários.','success');
+      updateHeaderMeta();
     }catch(err){showToast('Erro ao ler cadastro: '+err.message,'error');}
   };
   reader.readAsArrayBuffer(file);
@@ -2045,6 +2046,7 @@ function handleFileTaxas(file){
       META_TAXAS={file:file.name,carts:nCarts,months:months.length};
       persistTaxas();renderGerencial();
       showToast('✓ Receitas importadas: '+nCarts+' carteiras, '+months.length+' meses.','success');
+      updateHeaderMeta();
     }catch(err){showToast('Erro ao ler receitas: '+err.message,'error');}
   };
   reader.readAsArrayBuffer(file);
