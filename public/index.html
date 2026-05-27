@@ -1394,33 +1394,63 @@ function parseClientesWorkbook(wb){
   const ws16cu=wb.Sheets[wb.SheetNames.find(n=>n.includes('Custod'))];
   if(ws16cu){const aoa=XLSX.utils.sheet_to_json(ws16cu,{header:1,raw:true,defval:null});for(let i=1;i<aoa.length;i++){const r=aoa[i];if(!r||!r[0]||!r[1])continue;const c=String(r[0]).trim(),cu=String(r[1]).trim();if(cu==='CDI'||cu==='IBOV'||cu==='Carteira'||cu.toLowerCase()==='nd')continue;const mes=typeof r[2]==='number'?r[2]:null,ano=typeof r[3]==='number'?r[3]:null;if(!t16Cust[c])t16Cust[c]={};t16Cust[c][cu]={mes,ano};}}
   const carteiras=[...new Set([...Object.keys(t1),...Object.keys(t2),...Object.keys(t16Class),...Object.keys(t16Cust)])].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  return{t1,t2,t16Class,t16Cust,carteiras};
+  const g=computeCartGruposFromCarteiras(carteiras);
+  return{t1,t2,t16Class,t16Cust,carteiras,grupos:g.grupos,gruposMap:g.gruposMap};
 }
 
+function computeCartGruposFromCarteiras(carteiras){
+  // Derive prefix-based groupings from a list of portfolio names.
+  // A "grupo" is a prefix (before the first underscore) shared by 2+ portfolios.
+  const gruposMap={};
+  (carteiras||[]).forEach(c=>{
+    const idx=c.indexOf('_');
+    if(idx<=0)return;
+    const pref=c.slice(0,idx);
+    if(!pref)return;
+    if(!gruposMap[pref])gruposMap[pref]=[];
+    gruposMap[pref].push(c);
+  });
+  Object.keys(gruposMap).forEach(k=>{if(gruposMap[k].length<2)delete gruposMap[k];});
+  const grupos=Object.keys(gruposMap).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  return{grupos,gruposMap};
+}
 function persistCarteiras(){try{localStorage.setItem(STORE_KEY_C,JSON.stringify({data:CART_DATA,meta:META_C}));}catch(e){}}
-function restoreCarteirasFromStorage(){try{const raw=localStorage.getItem(STORE_KEY_C);if(!raw)return false;const obj=JSON.parse(raw);if(!obj||!obj.data)return false;CART_DATA=obj.data;META_C=obj.meta||null;setupCarteirasUI();return true;}catch(e){return false;}}
+function restoreCarteirasFromStorage(){try{const raw=localStorage.getItem(STORE_KEY_C);if(!raw)return false;const obj=JSON.parse(raw);if(!obj||!obj.data)return false;CART_DATA=obj.data;META_C=obj.meta||null;
+  // Backfill grupos/gruposMap for data persisted by older versions of the dashboard.
+  if(CART_DATA&&(!CART_DATA.grupos||!CART_DATA.gruposMap)){const g=computeCartGruposFromCarteiras(CART_DATA.carteiras||[]);CART_DATA.grupos=g.grupos;CART_DATA.gruposMap=g.gruposMap;}
+  setupCarteirasUI();return true;}catch(e){return false;}}
 
 function getCarteirasPortfolios(){
-  if(cartState.grupoCart&&Object.keys(CADASTRO).length){
-    return Object.entries(CADASTRO).filter(([k,v])=>v.grupoCarts===cartState.grupoCart)
-      .map(([k])=>k).filter(k=>DATA.some(r=>r.c===k)||(CART_DATA&&CART_DATA.carteiras&&CART_DATA.carteiras.includes(k)))
-      .sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  }else if(cartState.carteira){return[cartState.carteira];}
+  if(cartState.grupoCart){
+    // Resolve groupings strictly from the currently loaded carteiras spreadsheet.
+    if(CART_DATA&&CART_DATA.gruposMap&&CART_DATA.gruposMap[cartState.grupoCart]){
+      return CART_DATA.gruposMap[cartState.grupoCart].slice().sort((a,b)=>a.localeCompare(b,'pt-BR'));
+    }
+    return[];
+  }else if(cartState.carteira){
+    if(CART_DATA&&CART_DATA.carteiras&&CART_DATA.carteiras.includes(cartState.carteira))return[cartState.carteira];
+    return[];
+  }
   return[];
 }
 function setupCarteirasUI(){
   const sel=document.getElementById('cartCartSelect');
   sel.innerHTML='<option value="">— Selecione uma carteira —</option>';
-  // Add grupo options from CADASTRO
-  if(CADASTRO_GRUPOS_CARTS.length){
+  const carteirasArr=(CART_DATA&&CART_DATA.carteiras)||[];
+  const gruposArr=(CART_DATA&&CART_DATA.grupos)||[];
+  // Drop any previously selected group/portfolio that doesn't exist in the new spreadsheet.
+  if(cartState.grupoCart&&!gruposArr.includes(cartState.grupoCart))cartState.grupoCart='';
+  if(cartState.carteira&&!carteirasArr.includes(cartState.carteira))cartState.carteira='';
+  // Show groupings only when they actually exist in the imported spreadsheet.
+  if(gruposArr.length){
     const grpOpt=document.createElement('optgroup');grpOpt.label='── Grupos ──';
-    CADASTRO_GRUPOS_CARTS.forEach(g=>{const o=document.createElement('option');o.value='grupo:::'+g;o.textContent='Grupo - '+g;grpOpt.appendChild(o);});
+    gruposArr.forEach(g=>{const o=document.createElement('option');o.value='grupo:::'+g;o.textContent='Grupo - '+g;grpOpt.appendChild(o);});
     sel.appendChild(grpOpt);
     const indOpt=document.createElement('optgroup');indOpt.label='── Carteiras ──';
-    (CART_DATA.carteiras||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;indOpt.appendChild(o);});
+    carteirasArr.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;indOpt.appendChild(o);});
     sel.appendChild(indOpt);
   }else{
-    (CART_DATA.carteiras||[]).forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
+    carteirasArr.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;sel.appendChild(o);});
   }
   document.getElementById('uploadScreenCart').style.display='none';
   document.getElementById('dashboardCart').style.display='block';
